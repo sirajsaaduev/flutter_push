@@ -1,13 +1,12 @@
-import 'dart:async';
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
@@ -20,133 +19,284 @@ class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String millisecondsText = "";
-  int cvet = 0xFF40CA88;
-  GameState gameState = GameState.readyToStart;
-  Timer? waitingTimer;
-  Timer? stoppableTimer;
+  BodyPart? defendingBodyPart;
+  BodyPart? attackingBodyPart;
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      backgroundColor: const Color(0xFF282E3D),
-      body: Stack(
+      backgroundColor: const Color.fromRGBO(213, 222, 240, 1),
+      body: Column(
         children: [
-          const Align(
-            alignment: Alignment(0, -0.8),
-            child: Text(
-              "Test your\nreaction speed",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  fontSize: 38,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.white),
-            ),
+          const SizedBox(
+            height: 40,
           ),
-          Align(
-            alignment: Alignment.center,
-            child: ColoredBox(
-              color: const Color(0xFF6D6D6D),
-              child: SizedBox(
-                height: 150,
-                width: 300,
-                child: Center(
-                  child: Text(
-                    millisecondsText,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                        fontSize: 36,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white),
-                  ),
+          Row(
+            children: const [
+              SizedBox(
+                width: 16,
+              ),
+              Expanded(child: Center(child: Text("You"))),
+              SizedBox(
+                width: 11,
+              ),
+              SizedBox(
+                width: 12,
+              ),
+              Expanded(child: Center(child: Text("Enemy"))),
+              SizedBox(
+                width: 16,
+              ),
+            ],
+          ),
+          const SizedBox(
+            height: 11,
+          ),
+          const Life(),
+          const SizedBox(
+            height: 4,
+          ),
+          const Life(),
+          const SizedBox(
+            height: 4,
+          ),
+          const Life(),
+          const SizedBox(
+            height: 4,
+          ),
+          const Life(),
+          const SizedBox(
+            height: 4,
+          ),
+          const Life(),
+          const Expanded(child: SizedBox()),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(
+                width: 16,
+              ),
+              Expanded(
+                child: Column(
+                  // ignore: prefer_const_literals_to_create_immutables
+                  children: [
+                    Text("Defend".toUpperCase()),
+                    const SizedBox(
+                      height: 13,
+                    ),
+                    BodyPartButton(
+                        bodyPart: BodyPart.head,
+                        selected: defendingBodyPart == BodyPart.head,
+                        bodyPartSetter: _selectDefendingBodyPart),
+                    const SizedBox(
+                      height: 14,
+                    ),
+                    BodyPartButton(
+                        bodyPart: BodyPart.torso,
+                        selected: defendingBodyPart == BodyPart.torso,
+                        bodyPartSetter: _selectDefendingBodyPart),
+                    const SizedBox(
+                      height: 14,
+                    ),
+                    BodyPartButton(
+                        bodyPart: BodyPart.legs,
+                        selected: defendingBodyPart == BodyPart.legs,
+                        bodyPartSetter: _selectDefendingBodyPart),
+                  ],
                 ),
               ),
-            ),
+              const SizedBox(
+                width: 12,
+              ),
+              Expanded(
+                child: Column(
+                  // ignore: prefer_const_literals_to_create_immutables
+                  children: [
+                    Text("Attack".toUpperCase()),
+                    const SizedBox(
+                      height: 13,
+                    ),
+                    BodyPartButton(
+                        bodyPart: BodyPart.head,
+                        selected: attackingBodyPart == BodyPart.head,
+                        bodyPartSetter: _selectAttackingBodyPart),
+                    const SizedBox(
+                      height: 14,
+                    ),
+                    BodyPartButton(
+                        bodyPart: BodyPart.torso,
+                        selected: attackingBodyPart == BodyPart.torso,
+                        bodyPartSetter: _selectAttackingBodyPart),
+                    const SizedBox(
+                      height: 14,
+                    ),
+                    BodyPartButton(
+                        bodyPart: BodyPart.legs,
+                        selected: attackingBodyPart == BodyPart.legs,
+                        bodyPartSetter: _selectAttackingBodyPart),
+                  ],
+                ),
+              ),
+              const SizedBox(
+                width: 16,
+              ),
+            ],
           ),
-          Align(
-            alignment: const Alignment(0, 0.8),
-            child: GestureDetector(
-              onTap: () => setState(() {
-                switch (gameState) {
-                  case GameState.readyToStart:
-                    gameState = GameState.waiting;
-                    _startWaitingTimer();
-                    millisecondsText = "";
-                    cvet = 0xFFE0982D;
-                    break;
-                  case GameState.waiting:
-                    break;
-                  case GameState.canBeStopped:
-                    gameState = GameState.readyToStart;
-                    stoppableTimer?.cancel();
-                    cvet = 0xFF40CA88;
-                    break;
-                }
-              }),
-              child: ColoredBox(
-                color: Color(cvet),
-                child: SizedBox(
-                  height: 200,
-                  width: 200,
-                  child: Center(
-                    child: Text(
-                      _getButtonText(),
-                      style: const TextStyle(
-                          fontSize: 38,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white),
+          const SizedBox(
+            height: 14,
+          ),
+          Row(
+            children: [
+              const SizedBox(
+                width: 16,
+              ),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () =>
+                      defendingBodyPart != null && attackingBodyPart != null
+                          // ignore: avoid_print, unnecessary_null_comparison
+                          ? defendingBodyPart == null
+                          : print("jjj"),
+                  child: SizedBox(
+                    height: 40,
+                    child: ColoredBox(
+                      color:
+                          defendingBodyPart != null && attackingBodyPart != null
+                              ? const Color.fromRGBO(0, 0, 0, 0.87)
+                              : const Color.fromRGBO(0, 0, 0, 0.38),
+                      child: Center(
+                        child: Text(
+                          "Go".toUpperCase(),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w900,
+                              fontSize: 16,
+                              color: Colors.white),
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
+              const SizedBox(
+                width: 16,
+              ),
+            ],
+          ),
+          const SizedBox(
+            height: 40,
           ),
         ],
       ),
     );
   }
 
-  String _getButtonText() {
-    switch (gameState) {
-      case GameState.readyToStart:
-        return "START";
-      case GameState.waiting:
-        return "WAIT";
-      case GameState.canBeStopped:
-        return "STOP";
-    }
-  }
-
-  void _startWaitingTimer() {
-    final int randomMilliseconds = Random().nextInt(4000) + 1000;
-    waitingTimer = Timer(Duration(milliseconds: randomMilliseconds), () {
-      setState(() {
-        gameState = GameState.canBeStopped;
-        cvet = 0xFFE02D47;
-      });
-      _startStoppableTimer();
+  void _selectDefendingBodyPart(final BodyPart value) {
+    setState(() {
+      defendingBodyPart = value;
     });
   }
 
-  void _startStoppableTimer() {
-    stoppableTimer = Timer.periodic(Duration(milliseconds: 16), (timer) {
-      setState(() {
-        millisecondsText = "${timer.tick * 16} ms";
-      });
+  void _selectAttackingBodyPart(final BodyPart value) {
+    setState(() {
+      attackingBodyPart = value;
     });
-  }
-
-  @override
-  void dispose() {
-    waitingTimer?.cancel();
-    stoppableTimer?.cancel();
-    super.dispose();
   }
 }
 
-enum GameState { readyToStart, waiting, canBeStopped }
+class BodyPart {
+  final String name;
+
+  const BodyPart._(this.name);
+
+  static const head = BodyPart._("Head");
+  static const torso = BodyPart._("Torso");
+  static const legs = BodyPart._("Legs");
+
+  @override
+  String toString() {
+    return 'BodyPart{name: $name}';
+  }
+}
+
+class BodyPartButton extends StatelessWidget {
+  final BodyPart bodyPart;
+  final bool selected;
+  final ValueSetter<BodyPart> bodyPartSetter;
+
+  const BodyPartButton({
+    Key? key,
+    required this.bodyPart,
+    required this.selected,
+    required this.bodyPartSetter,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => bodyPartSetter(bodyPart),
+      child: SizedBox(
+        height: 40,
+        child: ColoredBox(
+          color: selected
+              ? const Color.fromRGBO(28, 121, 206, 1)
+              : const Color.fromRGBO(0, 0, 0, 0.38),
+          child: Center(child: Text(bodyPart.name.toUpperCase())),
+        ),
+      ),
+    );
+  }
+}
+
+class Life extends StatelessWidget {
+  const Life({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: const [
+            SizedBox(
+              width: 16,
+            ),
+            Expanded(
+              child: Center(
+                child: Text(
+                  "1",
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: Color.fromRGBO(21, 22, 2, 1)),
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 11,
+            ),
+            SizedBox(
+              width: 12,
+            ),
+            Expanded(
+              child: Center(
+                child: Text(
+                  "1",
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: Color.fromRGBO(21, 22, 2, 1)),
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 16,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
